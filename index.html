@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form with Dynamic Entries</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.2/xlsx.full.min.js"></script>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4">Form with Dynamic Entries</h1>
+        <form id="yourForm">
+            <!-- Form fields -->
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" id="name" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="mobile">Mobile:</label>
+                <input type="text" id="mobile" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="address">Address:</label>
+                <input type="text" id="address" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="aadhar">Aadhar:</label>
+                <input type="text" id="aadhar" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="gender">Gender:</label>
+                <select id="gender" class="form-control">
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="dob">Date of Birth:</label>
+                <input type="date" id="dob" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="state">State:</label>
+                <input type="text" id="state" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="city">City:</label>
+                <input type="text" id="city" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="madeBy">Made By:</label>
+                <input type="text" id="madeBy" class="form-control">
+            </div>
+            
+            <!-- Nominee fields -->
+            <h3>Nominees</h3>
+            <div id="nominee-container">
+                <div class="nominee-entry">
+                    <div class="form-group">
+                        <label for="nomineeName">Nominee Name:</label>
+                        <input type="text" class="form-control nomineeName">
+                    </div>
+                    <div class="form-group">
+                        <label for="nomineeRelation">Relation:</label>
+                        <input type="text" class="form-control nomineeRelation">
+                    </div>
+                    <div class="form-group">
+                        <label for="nomineeAge">Age:</label>
+                        <input type="number" class="form-control nomineeAge">
+                    </div>
+                </div>
+            </div>
+            <button type="button" id="addNominee" class="btn btn-primary mb-3">Add Nominee</button>
+            <button type="button" id="submitForm" class="btn btn-success">Submit</button>
+            <button type="button" id="clearData" class="btn btn-danger">Clear Data</button>
+        </form>
+
+        <div class="mt-4">
+            <button id="exportExcel" class="btn btn-warning">Export to Excel</button>
+        </div>
+
+        <!-- Display added entries -->
+        <h2 class="mt-5">Entries</h2>
+        <table id="entries" class="table table-bordered mt-3">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Mobile</th>
+                    <th>Address</th>
+                    <th>Email</th>
+                    <th>Aadhar</th>
+                    <th>Gender</th>
+                    <th>Date of Birth</th>
+                    <th>State</th>
+                    <th>City</th>
+                    <th>Made By</th>
+                    <th>Nominee Name</th>
+                    <th>Relation</th>
+                    <th>Age</th>
+                </tr>
+            </thead>
+            <tbody id="entriesBody">
+            </tbody>
+        </table>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            let nomineeCount = 0;
+
+            // Add a new nominee entry
+            $('#addNominee').click(function() {
+                nomineeCount++;
+                $('#nominee-container').append(`
+                    <div class="nominee-entry">
+                        <div class="form-group">
+                            <label for="nomineeName${nomineeCount}">Nominee Name:</label>
+                            <input type="text" class="form-control nomineeName" id="nomineeName${nomineeCount}">
+                        </div>
+                        <div class="form-group">
+                            <label for="nomineeRelation${nomineeCount}">Relation:</label>
+                            <input type="text" class="form-control nomineeRelation" id="nomineeRelation${nomineeCount}">
+                        </div>
+                        <div class="form-group">
+                            <label for="nomineeAge${nomineeCount}">Age:</label>
+                            <input type="number" class="form-control nomineeAge" id="nomineeAge${nomineeCount}">
+                        </div>
+                        <button type="button" class="btn btn-danger removeNominee">Remove Nominee</button>
+                        <hr>
+                    </div>
+                `);
+            });
+
+            // Remove a nominee entry
+            $(document).on('click', '.removeNominee', function() {
+                $(this).closest('.nominee-entry').remove();
+            });
+
+            // Submit the form
+            $('#submitForm').click(function() {
+                let name = $('#name').val();
+                let mobile = $('#mobile').val();
+                let address = $('#address').val();
+                let email = $('#email').val();
+                let aadhar = $('#aadhar').val();
+                let gender = $('#gender').val();
+                let dob = $('#dob').val();
+                let state = $('#state').val();
+                let city = $('#city').val();
+                let madeBy = $('#madeBy').val();
+
+                // Collect nominees
+                let nominees = [];
+                $('.nominee-entry').each(function() {
+                    let nomineeName = $(this).find('.nomineeName').val();
+                    let nomineeRelation = $(this).find('.nomineeRelation').val();
+                    let nomineeAge = $(this).find('.nomineeAge').val();
+                    nominees.push({
+                        name: nomineeName,
+                        relation: nomineeRelation,
+                        age: nomineeAge
+                    });
+                });
+
+                // Append to the table
+                let rows = '';
+                nominees.forEach(nominee => {
+                    rows += `
+                        <tr>
+                            <td>${name}</td>
+                            <td>${mobile}</td>
+                            <td>${address}</td>
+                            <td>${email}</td>
+                            <td>${aadhar}</td>
+                            <td>${gender}</td>
+                            <td>${dob}</td>
+                            <td>${state}</td>
+                            <td>${city}</td>
+                            <td>${madeBy}</td>
+                            <td>${nominee.name}</td>
+                            <td>${nominee.relation}</td>
+                            <td>${nominee.age}</td>
+                        </tr>
+                    `;
+                });
+
+                $('#entriesBody').append(rows);
+            });
+
+            // Clear form data
+            $('#clearData').click(function() {
+                $('#yourForm').trigger('reset');
+                $('#entriesBody').empty();
+                $('#nominee-container').empty();
+                $('#nominee-container').append(`
+                    <div class="nominee-entry">
+                        <div class="form-group">
+                            <label for="nomineeName">Nominee Name:</label>
+                            <input type="text" class="form-control nomineeName">
+                        </div>
+                        <div class="form-group">
+                            <label for="nomineeRelation">Relation:</label>
+                            <input type="text" class="form-control nomineeRelation">
+                        </div>
+                        <div class="form-group">
+                            <label for="nomineeAge">Age:</label>
+                            <input type="number" class="form-control nomineeAge">
+                        </div>
+                    </div>
+                `);
+            });
+
+            // Export to Excel
+            $('#exportExcel').click(function() {
+                let wb = XLSX.utils.book_new();
+                let ws = XLSX.utils.table_to_sheet(document.querySelector("#entries"));
+                XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+                XLSX.writeFile(wb, "entries.xlsx");
+            });
+        });
+    </script>
+</body>
+</html>
